@@ -3,57 +3,42 @@ import React from "react"
 var HomeView = React.createClass({
 	getInitialState: function() {
 		return {
-			currentYear: new Date().getFullYear(),
-			activeButton: "present"
+			year: new Date().getFullYear(),
+			activeButton: null,
+			pace: 500
 		}
 	},
 	_activatePast: function() {
+		clearTimeout(this.state.intervalId)
 		var currentThis = this
+		var intervalId = setTimeout(this._activatePast,this.state.pace)
 		this.setState({
-			activeButton: "past"
-		})
-		this._checkActiveButton()
+			activeButton: "past",
+			pace: currentThis.state.pace > 100 ? currentThis.state.pace * 0.9 : currentThis.state.pace,
+			year: currentThis.state.year - 1,
+			intervalId: intervalId
+		})	
 	},
 	_activatePresent: function() {
+		clearTimeout(this.state.intervalId,this.state.pace)
+		var intervalId = setTimeout(this._activatePresent,this.state.pace)
 		var currentThis = this
 		this.setState({
-			activeButton: "present"
+			activeButton: "present",
+			pace: currentThis.state.pace < 500 ? currentThis.state.pace / 0.9 : currentThis.state.pace,
+			intervalId: intervalId
 		})
 	},
 	_activateFuture: function() {
+		clearTimeout(this.state.intervalId)
 		var currentThis = this
+		var intervalId = setTimeout(this._activateFuture,this.state.pace)
 		this.setState({
-			activeButton: "future"
-		})
-		this._checkActiveButton()
-	},
-	_decrease: function() {
-		var currentThis = this
-		var buttonStatus = this.state.activeButton,
-			year = this.state.currentYear
-		this.setState({
-			currentYear: buttonStatus === "past" ? year -= 1 : year
-		})
-	},
-	_increase: function() {
-		var currentThis = this
-		var buttonStatus = this.state.activeButton,
-			year = this.state.currentYear
-		this.setState({
-			currentYear: buttonStatus === "future" ? year += 1 : year
-		})
-	},
-	_checkActiveButton: function() {
-		console.log(this.state.activeButton)
-		var currentThis = this
-		if(this.state.activeButton === "past"){
-			setInterval(function(){currentThis._decrease()},1000)
-		} else if (this.state.activeButton === "future"){
-			setInterval(function(){currentThis._increase()},1000)
-		} else {
-			clearInterval(currentThis._decrease)
-			clearInterval(currentThis._increase)
-		}
+			activeButton: "future",
+			pace: currentThis.state.pace > 100 ? currentThis.state.pace * 0.9 : currentThis.state.pace,
+			year: currentThis.state.year + 1,
+			intervalId: intervalId
+		})	
 	},
 	render: function() {
 		var pastStyle = {
@@ -67,7 +52,7 @@ var HomeView = React.createClass({
 		}
 		return (
 			<div className="home-view">
-				<h1>{this.state.currentYear}</h1>
+				<h1>{this.state.year}</h1>
 				<div className="machine-nav-bar">
 					<button className="past"   style={pastStyle}    onClick={this._activatePast}></button>
 					<button className="present"style={presentStyle} onClick={this._activatePresent}></button>
